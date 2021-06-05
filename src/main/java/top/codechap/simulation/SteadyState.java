@@ -1,5 +1,6 @@
 package top.codechap.simulation;
 
+import lombok.Data;
 import top.codechap.equations.FixedFunction;
 import top.codechap.model.network.NetWork;
 import top.codechap.model.node.Node;
@@ -14,16 +15,13 @@ import java.util.List;
  * @date 2021-06-04 15:28
  * @description SteadyState
  */
+@Data
 public class SteadyState {
-    public static void main(String[] args) {
-
-    }
+    private Integer times;
 
     public void run() {
-        String fileName = "C:\\Users\\WangHH\\Desktop\\InputData.xlsx";
-        Excel2Network excel2Network = new Excel2Network(fileName);
-        NetWork netWork = excel2Network.getNetWork();
-        netWork.init();
-        FixedFunction fixedFunction = new FixedFunction(netWork);
+        for (int i = 0; i < times; i++) {
+
+        }
     }
 }

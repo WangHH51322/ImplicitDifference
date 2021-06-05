@@ -75,6 +75,21 @@ public class LongPipe extends Pipe{
         Integer last = hNumb[hNumb.length - 1];
         return last;
     }
+
+    @Override
+    public Integer getLastMomentumNumb() {
+        Integer[] momentumNumb = getMomentumNumb();
+        Integer last = momentumNumb[momentumNumb.length - 1];
+        return last;
+    }
+
+    @Override
+    public Integer getLastMotionNumb() {
+        Integer[] motionNumb = getMotionNumb();
+        Integer last = motionNumb[motionNumb.length - 1];
+        return last;
+    }
+
     @Override
     public String toString() {
         return "pipeNumb: " + getNumb() + "  " +

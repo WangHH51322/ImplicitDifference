@@ -11,9 +11,15 @@ import lombok.NoArgsConstructor;
  */
 @Data
 @AllArgsConstructor
-@NoArgsConstructor
 public class AviationKerosene {
     private Double rou;
     private Double temperature;
     private Double K;
+    private Double viscosity;
+
+    public AviationKerosene() {
+        this.rou = 875.00;
+        this.K = 1360000000.00;
+        this.viscosity = 1.019 * Math.pow(10,-6);
+    }
 }

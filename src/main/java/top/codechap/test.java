@@ -2,6 +2,8 @@ package top.codechap;
 
 import javafx.scene.chart.PieChart;
 import sun.security.mscapi.CPublicKey;
+import top.codechap.equations.FixedFunction;
+import top.codechap.model.liquid.AviationKerosene;
 import top.codechap.model.network.NetWork;
 import top.codechap.model.node.Node;
 import top.codechap.model.pipe.LongPipe;
@@ -10,8 +12,10 @@ import top.codechap.model.pipe.ShortPipe;
 import top.codechap.model.valve.RegulatingValve;
 import top.codechap.utils.Excel2Network;
 import top.codechap.utils.ExcelInput;
+import top.codechap.utils.ExcelOutput;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -22,7 +26,31 @@ import java.util.Map;
  */
 public class test {
     public static void main(String[] args) {
-//        test04();
+        String fileName = "C:\\Users\\WangHH\\Desktop\\InputData.xlsx";
+        Excel2Network excel2Network = new Excel2Network(fileName);
+        NetWork netWork = excel2Network.getNetWork();
+        netWork.init();
+
+        FixedFunction fixedFunction = new FixedFunction(netWork);
+        AviationKerosene oil = new AviationKerosene();
+        double[][] doubles = fixedFunction.GenerateCoefficientMatrix(oil);
+        System.out.println("doubles: ");
+        for (int i = 0; i < doubles.length; i++) {
+            for (int j = 0; j < doubles[i].length; j++) {
+                System.out.print(doubles[i][j] + " ");
+            }
+            System.out.println(" ");
+        }
+
+        ExcelOutput excelOutput = new ExcelOutput();
+        excelOutput.setFileName("C:\\Users\\WangHH\\Desktop\\OutputData.xlsx");
+        Map<String,double[][]> inputData = new HashMap<>();
+        inputData.put("系数矩阵",doubles);
+        excelOutput.setInputData(inputData);
+        excelOutput.writeTwoData2Excel();
+    }
+
+    private static void test05() {
         String fileName = "C:\\Users\\WangHH\\Desktop\\InputData2.xlsx";
         Excel2Network excel2Network = new Excel2Network(fileName);
         NetWork netWork = excel2Network.getNetWork();
@@ -35,7 +63,6 @@ public class test {
         }
         sum = 2 * sum + longPipes.size() + 4 * (shortPipes.size() + regValves.size());
         System.out.println("sum = " + sum);
-//    double[][] doubles = new double[11827][11827];
     }
 
     private static void test04() {
@@ -162,13 +189,13 @@ public class test {
             pipes.add(pipe);
         }
         List<ShortPipe> pipes1 = new ArrayList<>();
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < 1; i++) {
             ShortPipe pipe = new ShortPipe();
             pipe.setLength(18.00);
             pipes1.add(pipe);
         }
         List<RegulatingValve> valves = new ArrayList<>();
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < 1; i++) {
             RegulatingValve valve = new RegulatingValve();
             valves.add(valve);
         }
@@ -176,7 +203,7 @@ public class test {
 
         NetWork netWork = new NetWork();
         netWork.setLongPipes(pipes);
-        netWork.setShortPipes(pipes1);
+//        netWork.setShortPipes(pipes1);
         netWork.setRegValves(valves);
         netWork.init();
         for (LongPipe pipe : pipes) {
@@ -190,18 +217,17 @@ public class test {
             }
             System.out.println(" ");
         }
-
-        for (ShortPipe shortPipe : pipes1) {
-            System.out.println("shortPipe:");
-            for (int i = 0; i < shortPipe.getQNumb().length; i++) {
-                System.out.print(shortPipe.getQNumb()[i] + " ");
-            }
-            System.out.println(" ");
-            for (int i = 0; i < shortPipe.getHNumb().length; i++) {
-                System.out.print(shortPipe.getHNumb()[i] + " ");
-            }
-            System.out.println(" ");
-        }
+//        for (ShortPipe shortPipe : pipes1) {
+//            System.out.println("shortPipe:");
+//            for (int i = 0; i < shortPipe.getQNumb().length; i++) {
+//                System.out.print(shortPipe.getQNumb()[i] + " ");
+//            }
+//            System.out.println(" ");
+//            for (int i = 0; i < shortPipe.getHNumb().length; i++) {
+//                System.out.print(shortPipe.getHNumb()[i] + " ");
+//            }
+//            System.out.println(" ");
+//        }
         for (RegulatingValve valve : valves) {
             System.out.println("valve:");
             for (int i = 0; i < valve.getQNumb().length; i++) {
@@ -210,6 +236,46 @@ public class test {
             System.out.println(" ");
             for (int i = 0; i < valve.getHNumb().length; i++) {
                 System.out.print(valve.getHNumb()[i] + " ");
+            }
+            System.out.println(" ");
+        }
+        System.out.println("=++++++++++++++++++++++++++++=");
+        for (LongPipe pipe : pipes) {
+            System.out.println("longPipe:");
+            for (int i = 0; i < pipe.getMomentumNumb().length; i++) {
+                System.out.print(pipe.getMomentumNumb()[i] + " ");
+            }
+            System.out.println(" ");
+            System.out.println("OutBoundaryConditionNumb: " + pipe.getOutBoundaryConditionNumb());
+            System.out.println("InBoundaryConditionNumb: " + pipe.getInBoundaryConditionNumb());
+            for (int i = 0; i < pipe.getMotionNumb().length; i++) {
+                System.out.print(pipe.getMotionNumb()[i] + " ");
+            }
+            System.out.println(" ");
+        }
+//        for (ShortPipe shortPipe : pipes1) {
+//            System.out.println("shortPipe:");
+//            for (int i = 0; i < shortPipe.getMomentumNumb().length; i++) {
+//                System.out.print(shortPipe.getMomentumNumb()[i] + " ");
+//            }
+//            System.out.println(" ");
+//            System.out.println("OutBoundaryConditionNumb: " + shortPipe.getOutBoundaryConditionNumb());
+//            System.out.println("InBoundaryConditionNumb: " + shortPipe.getInBoundaryConditionNumb());
+//            for (int i = 0; i < shortPipe.getMotionNumb().length; i++) {
+//                System.out.print(shortPipe.getMotionNumb()[i] + " ");
+//            }
+//            System.out.println(" ");
+//        }
+        for (RegulatingValve valve : valves) {
+            System.out.println("valve:");
+            for (int i = 0; i < valve.getMomentumNumb().length; i++) {
+                System.out.print(valve.getMomentumNumb()[i] + " ");
+            }
+            System.out.println(" ");
+            System.out.println("OutBoundaryConditionNumb: " + valve.getOutBoundaryConditionNumb());
+            System.out.println("InBoundaryConditionNumb: " + valve.getInBoundaryConditionNumb());
+            for (int i = 0; i < valve.getMotionNumb().length; i++) {
+                System.out.print(valve.getMotionNumb()[i] + " ");
             }
             System.out.println(" ");
         }

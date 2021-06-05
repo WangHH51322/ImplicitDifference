@@ -29,6 +29,9 @@ public abstract class Element {
     public abstract Integer getFirstHNumb();    //获取HNumb中的第一个值
     public abstract Integer getLastHNumb();     //获取HNumb中的最后一个值
 
+    public abstract Integer getLastMomentumNumb();     //获取MomentumNumb中的最后一个值
+    public abstract Integer getLastMotionNumb();     //获取MomentumNumb中的最后一个值
+
     @Override
     public String toString() {
         return "elementNumb" + numb + "  " +

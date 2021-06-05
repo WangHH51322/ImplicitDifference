@@ -52,6 +52,16 @@ public class ShortPipe extends Pipe{
     }
 
     @Override
+    public Integer getLastMomentumNumb() {
+        return getMomentumNumb()[0];
+    }
+
+    @Override
+    public Integer getLastMotionNumb() {
+        return getMotionNumb()[0];
+    }
+
+    @Override
     public String toString() {
         return "pipeNumb: " + getNumb() + "  " +
                 "pipeStartNumb: " + getStartNumb() + "  " +
