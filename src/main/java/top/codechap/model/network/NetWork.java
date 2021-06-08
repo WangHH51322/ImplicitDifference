@@ -109,7 +109,6 @@ public class NetWork {
         HnSize = sum + 2 * (longPipes.size() + shortPipes.size() + regValves.size());
         sum = 2 * sum + longPipes.size() + 4 * (shortPipes.size() + regValves.size());
         matrixSize = sum;
-
     }
 
     private void CalculateQHAndMMNumb() {  //给元件中的QNumb,HNumb;MomentumNumb,MotionNumb,outBoundaryConditionNumb,inBoundaryConditionNumb属性赋值
@@ -150,7 +149,7 @@ public class NetWork {
             Integer inBoundaryConditionNumb;
             if (i == 0) {
                 MomentumNumb[0] = startMomentumNumb;
-                MotionNumb[0] = startMotionNumb + 1;
+                MotionNumb[0] = startMotionNumb;
             } else {
                 RegulatingValve regValveBefore = regValves.get(i - 1);
                 Integer addMomentumNumb = regValveBefore.getOutBoundaryConditionNumb();
@@ -183,7 +182,7 @@ public class NetWork {
             Integer inBoundaryConditionNumb;
             if (i == 0) {
                 MomentumNumb[0] = startMomentumNumb;
-                MotionNumb[0] = startMotionNumb + 1;
+                MotionNumb[0] = startMotionNumb;
             } else {
                 ShortPipe shortPipeBefore = shortPipes.get(i - 1);
                 Integer addMomentumNumb = shortPipeBefore.getOutBoundaryConditionNumb();
@@ -255,6 +254,7 @@ public class NetWork {
             RegulatingValve valve = regValves.get(i);
             Integer[] QNumb = new Integer[2];
             Integer[] HNumb = new Integer[2];
+            Integer[] HRealNumb = new Integer[2];
 
             if (i == 0) {   //给valve中的QNumb属性值赋值
                 QNumb[0] = startQNumb;
@@ -268,6 +268,10 @@ public class NetWork {
             }
             QNumb[1] = QNumb[0] + 1;
             HNumb[1] = HNumb[0] + 1;
+            for (int j = 0; j < HNumb.length; j++) {    //给管段中的HRealNumb属性值赋值
+                HRealNumb[j] = HNumb[j] - halfSize;
+            }
+            valve.setHRealNumb(HRealNumb);
             valve.setQNumb(QNumb);
             valve.setHNumb(HNumb);
         }
@@ -285,6 +289,7 @@ public class NetWork {
             ShortPipe shortPipe = shortPipes.get(i);
             Integer[] QNumb = new Integer[2];
             Integer[] HNumb = new Integer[2];
+            Integer[] HRealNumb = new Integer[2];
 
             if (i == 0) {   //给短管段中的QNumb属性值赋值
                 QNumb[0] = startQNumb;
@@ -298,6 +303,10 @@ public class NetWork {
             }
             QNumb[1] = QNumb[0] + 1;
             HNumb[1] = HNumb[0] + 1;
+            for (int j = 0; j < HNumb.length; j++) {    //给管段中的HRealNumb属性值赋值
+                HRealNumb[j] = HNumb[j] - halfSize;
+            }
+            shortPipe.setHRealNumb(HRealNumb);
             shortPipe.setQNumb(QNumb);
             shortPipe.setHNumb(HNumb);
         }
@@ -308,6 +317,7 @@ public class NetWork {
             LongPipe longPipe = longPipes.get(i);
             Integer[] QNumb = new Integer[longPipe.getSegments() + 1];
             Integer[] HNumb = new Integer[longPipe.getSegments()];
+            Integer[] HRealNumb = new Integer[longPipe.getSegments()];
 
             if (i == 0) {
                 for (int j = 0; j < QNumb.length; j++) {    //给第一根管段中的QNumb属性值赋值
@@ -325,6 +335,7 @@ public class NetWork {
             if (i == 0) {
                 for (int j = 0; j < HNumb.length; j++) {    //给管段中的HNumb属性值赋值
                     HNumb[j] = halfSize + j;
+                    HRealNumb[j] = j;
                 }
             } else {
                 LongPipe longPipeBefore = longPipes.get(i - 1);
@@ -333,7 +344,12 @@ public class NetWork {
                     HNumb[j] = (j+1) + add;
                 }
             }
+            for (int j = 0; j < HNumb.length; j++) {    //给管段中的HRealNumb属性值赋值
+                HRealNumb[j] = HNumb[j] - halfSize;
+            }
+            longPipe.setHRealNumb(HRealNumb);
             longPipe.setHNumb(HNumb);
+
         }
     }
 

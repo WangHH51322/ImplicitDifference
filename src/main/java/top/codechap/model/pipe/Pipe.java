@@ -25,6 +25,9 @@ public abstract class Pipe extends Element {
     private Double roughness;   //粗糙度
     private Double E;   //管材弹性模量
     private Double C;
+    private Double lambda;  //管段摩阻系数
+    private Double m;   //管段摩阻系数
+    private Double beta;    //管段摩阻系数
 ////    private Double segLength;   //分段长度
 
 //    private Node startNode; //管段起点节点
@@ -38,6 +41,10 @@ public abstract class Pipe extends Element {
     }
     public Double area() {  //管段横截面积
         return Math.PI * insideDiameter() * insideDiameter() / 4;
+    }
+
+    public Double CalculateHl(Double Qn,Double viscosity) { //计算整根管段的压降
+        return beta * Math.pow(Qn,(2-m)) * Math.pow(viscosity,m) * length / Math.pow(insideDiameter(),(5-m));
     }
 
     public abstract Integer getSegments();  //管段分段数

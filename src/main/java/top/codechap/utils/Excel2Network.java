@@ -100,11 +100,13 @@ public class Excel2Network {
             Integer valveStartNumb= valveStartNumbDouble.intValue();
             Double valveEndNumbDouble = Double.parseDouble(valve.get(2));
             Integer valveEndNumb = valveEndNumbDouble.intValue();
+            Double valveCv = Double.parseDouble(valve.get(3));
 
             RegulatingValve regValve = new RegulatingValve();
             regValve.setNumb(valveNumb);
             regValve.setStartNumb(valveStartNumb);
             regValve.setEndNumb(valveEndNumb);
+            regValve.setCv(valveCv);
             regValves.add(regValve);
         }
         this.regValves = regValves;

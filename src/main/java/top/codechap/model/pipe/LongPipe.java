@@ -2,11 +2,11 @@ package top.codechap.model.pipe;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 import top.codechap.constant.Constant;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * @author CodeChap
@@ -70,10 +70,103 @@ public class LongPipe extends Pipe{
     }
 
     @Override
+    public List<Integer> getFirstHNumbs() {
+        List<Integer> numbs = new ArrayList<>();
+        Integer[] hNumb = getHNumb();
+        Integer first = hNumb[0];
+        Integer second = first + 1;
+        numbs.add(first);
+        numbs.add(second);
+        return numbs;
+    }
+
+    @Override
     public Integer getLastHNumb() {
         Integer[] hNumb = getHNumb();
         Integer last = hNumb[hNumb.length - 1];
         return last;
+    }
+
+    @Override
+    public List<Integer> getLastHNumbs() {
+        List<Integer> numbs = new ArrayList<>();
+        Integer[] hNumb = getHNumb();
+        Integer last = hNumb[hNumb.length - 1];
+        Integer lastBefore = last - 1;
+        numbs.add(lastBefore);
+        numbs.add(last);
+        return numbs;
+    }
+
+    @Override
+    public List<Integer> getFirstHRealNumb() {
+        List<Integer> numbs = new ArrayList<>();
+        Integer[] hRealNumb = getHRealNumb();
+        Integer first = hRealNumb[0];
+        Integer second = first + 1;
+        numbs.add(first);
+        numbs.add(second);
+        return numbs;
+    }
+
+    @Override
+    public List<Integer> getLastHRealNumb() {
+        List<Integer> numbs = new ArrayList<>();
+        Integer[] hRealNumb = getHRealNumb();
+        Integer last = hRealNumb[hRealNumb.length - 1];
+        Integer lastBefore = last - 1;
+        numbs.add(lastBefore);
+        numbs.add(last);
+        return numbs;
+    }
+
+    @Override
+    public List<Double> getStartCoefficient() {
+        List<Double> coefficient = new ArrayList<>();
+        coefficient.add(1.5);
+        coefficient.add(-0.5);
+        return coefficient;
+    }
+
+    @Override
+    public List<Double> getEndCoefficient() {
+        List<Double> coefficient = new ArrayList<>();
+        Double coefficientOne = - Constant.SEGMENT_LENGTH / (Constant.SEGMENT_LENGTH + lastSegLength());
+        Double coefficientTwo = (Constant.SEGMENT_LENGTH + 2*lastSegLength()) / (Constant.SEGMENT_LENGTH + lastSegLength());
+        coefficient.add(coefficientOne);
+        coefficient.add(coefficientTwo);
+        return coefficient;
+    }
+
+
+    @Override
+    public Double getFirstQn(Double[] Qn) {
+        return Qn[getFirstQNumb()];
+    }
+
+    @Override
+    public Double getFirstHn(Double[] Hn) {
+        List<Integer> firstHRealNumb = getFirstHRealNumb();
+        Double H2 = Hn[firstHRealNumb.get(0)];
+        Double H3 = Hn[firstHRealNumb.get(1)];
+        List<Double> startCoefficient = getStartCoefficient();
+        Double H1 = startCoefficient.get(0)*H2 + startCoefficient.get(1) * H3;
+        return H1;
+    }
+
+    @Override
+    public Double getLastQn(Double[] Qn) {
+        return Qn[getLastQNumb()];
+    }
+
+    @Override
+    public Double getLastHn(Double[] Hn) {
+        List<Integer> lastHRealNumb = getLastHRealNumb();
+        Double HLastBeforeTwo = Hn[lastHRealNumb.get(0)];
+        Double HLastBeforeOne = Hn[lastHRealNumb.get(1)];
+        List<Double> endCoefficient = getEndCoefficient();
+        Double HLast = endCoefficient.get(0) * HLastBeforeTwo + endCoefficient.get(1) * HLastBeforeOne;
+        return HLast;
     }
 
     @Override

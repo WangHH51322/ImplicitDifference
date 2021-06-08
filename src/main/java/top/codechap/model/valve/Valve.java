@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import top.codechap.Element;
 import top.codechap.model.node.Node;
+import top.codechap.utils.CalculateCv;
 
 /**
  * @author CodeChap
@@ -12,9 +13,22 @@ import top.codechap.model.node.Node;
  * @description Valve
  */
 @Data
-@AllArgsConstructor
-//@NoArgsConstructor
 public abstract class Valve extends Element {
+
+    private Double Cv;
+
+    public Double CalculateCv(double startTime, double totalTime, double nowTime) {
+        double deltaTime = nowTime - startTime;
+        if (deltaTime <= 0.0) {
+            return Cv;
+        } else if (deltaTime < totalTime) {
+            return deltaTime / totalTime * Cv;
+        } else {
+            return -1.0;
+        }
+    }
+
+
 //    private Integer numb;
 //
 //    private Integer startNumb;  //阀门起点编号
