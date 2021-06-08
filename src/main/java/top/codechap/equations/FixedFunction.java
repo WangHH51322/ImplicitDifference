@@ -46,7 +46,7 @@ public class FixedFunction {
         this.netWork = netWork;
         this.oil = oil;
         initQ0 = 0.01;
-        initH0 = 600000.00;
+        initH0 = 600000.00 / (oil.getRou() * Constant.G);
         init();
     }
 
@@ -142,7 +142,7 @@ public class FixedFunction {
         CalculateLambda calculateLambda = new CalculateLambda();
         /*Complete运动方程中的Q的系数以及入口,出口边界条件*/
         for (int i = 0; i < longPipes.size(); i++) {
-            System.out.println("执行CompleteCoefficientMatrix()方法中的longPipes");
+//            System.out.println("执行CompleteCoefficientMatrix()方法中的longPipes");
             LongPipe longPipe = longPipes.get(i);
             Integer firstQNumb = longPipe.getFirstQNumb();
             Double diameter = longPipe.insideDiameter();
@@ -174,7 +174,7 @@ public class FixedFunction {
         }
         /*Complete阻力元件内部系数边界条件*/
         for (int i = 0; i < shortPipes.size(); i++) {
-            System.out.println("执行CompleteCoefficientMatrix()方法中的shortPipes");
+//            System.out.println("执行CompleteCoefficientMatrix()方法中的shortPipes");
             ShortPipe shortPipe = shortPipes.get(i);
             Integer firstQNumb = shortPipe.getFirstQNumb();
             Double diameter = shortPipe.insideDiameter();
@@ -187,6 +187,7 @@ public class FixedFunction {
             shortPipe.setBeta(calculateLambda.getBeta());
             /*短管压降计算*/
             Double deltaH = shortPipe.CalculateHl(Qn[firstQNumb],oil.getViscosity());
+            System.out.println("deltaH" + deltaH);
             /*短管运动方程右端向量b*/
             b[motionNumb[0]] = deltaH;
 
@@ -195,13 +196,14 @@ public class FixedFunction {
             EntranceBoundaryCondition(shortPipe);
         }
         for (int i = 0; i < regValves.size(); i++) {
-            System.out.println("执行CompleteCoefficientMatrix()方法中的regValves");
+//            System.out.println("执行CompleteCoefficientMatrix()方法中的regValves");
             RegulatingValve valve = regValves.get(i);
             Integer firstQNumb = valve.getFirstQNumb();
             Integer[] motionNumb = valve.getMotionNumb();    //短管段中运动方程行编号
             /*阀门Cv计算*/
 //            Double cv = valve.CalculateCv();
             Double cv = valve.getCv();
+//            Double cv = 60.00;
             /*阀门压降计算*/
             Double deltaH = Math.pow(Qn[firstQNumb],2) / cv;
             /*阀门运动方程右端向量b*/
@@ -210,11 +212,15 @@ public class FixedFunction {
             ExitBoundaryCondition(valve);
             EntranceBoundaryCondition(valve);
         }
+//        System.out.println("b:");
+//        for (int i = 0; i < b.length; i++) {
+//            System.out.print(b[i] + "_");
+//        }
         return CoefficientMatrix;
     }
 
     private void EntranceBoundaryCondition(Element element) throws Exception {
-        System.out.println("执行入口边界条件方法");
+//        System.out.println("执行入口边界条件方法");
         Node startNode = element.getStartNode();    //元件入口节点
         Integer nodeType = startNode.getType(); //元件入口节点的类型
         List<Element> inElements = startNode.getInElements(); //获取与这个节点相连,并且作为元件出口的其他元件
@@ -233,7 +239,7 @@ public class FixedFunction {
                 if (nodeType == 2) {    //startNode是盲段
                     b[inNumb] = 0;
                 } else if (nodeType == 0) { //startNode是管网入口
-                    b[inNumb] = startNode.getPressure();
+                    b[inNumb] = startNode.getPressure() / (oil.getRou() * Constant.G);
                 } else {
                     throw new RuntimeException("节点" + startNode.getNumb() + "作为元件" + element.getNumb() + "入口存在问题");
                 }
@@ -337,7 +343,7 @@ public class FixedFunction {
     }
 
     private void ExitBoundaryCondition(Element element) throws Exception {
-        System.out.println("执行出口边界条件方法");
+//        System.out.println("执行出口边界条件方法");
         Node endNode = element.getEndNode();    //元件出口节点边界条件
         Integer nodeType = endNode.getType();
         List<Element> inElements = endNode.getInElements(); //获取与这个节点相连,并且作为元件出口的其他元件

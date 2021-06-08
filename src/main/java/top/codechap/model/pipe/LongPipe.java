@@ -131,7 +131,7 @@ public class LongPipe extends Pipe{
     @Override
     public List<Double> getEndCoefficient() {
         List<Double> coefficient = new ArrayList<>();
-        Double coefficientOne = - Constant.SEGMENT_LENGTH / (Constant.SEGMENT_LENGTH + lastSegLength());
+        Double coefficientOne = - lastSegLength() / (Constant.SEGMENT_LENGTH + lastSegLength());
         Double coefficientTwo = (Constant.SEGMENT_LENGTH + 2*lastSegLength()) / (Constant.SEGMENT_LENGTH + lastSegLength());
         coefficient.add(coefficientOne);
         coefficient.add(coefficientTwo);

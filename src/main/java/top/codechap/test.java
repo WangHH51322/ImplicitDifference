@@ -1,6 +1,8 @@
 package top.codechap;
 
 import javafx.scene.chart.PieChart;
+import net.jamu.matrix.Matrices;
+import net.jamu.matrix.MatrixD;
 import sun.security.mscapi.CPublicKey;
 import top.codechap.equations.FixedFunction;
 import top.codechap.model.liquid.AviationKerosene;
@@ -10,6 +12,7 @@ import top.codechap.model.pipe.LongPipe;
 import top.codechap.model.pipe.Pipe;
 import top.codechap.model.pipe.ShortPipe;
 import top.codechap.model.valve.RegulatingValve;
+import top.codechap.simulation.SteadyState;
 import top.codechap.utils.Excel2Network;
 import top.codechap.utils.ExcelInput;
 import top.codechap.utils.ExcelOutput;
@@ -26,11 +29,55 @@ import java.util.Map;
  */
 public class test {
     public static void main(String[] args) throws Exception {
-        test06();
+        test08();
+     }
+
+    private static void test08() throws Exception {
+        String fileName = "C:\\Users\\WangHH\\Desktop\\InputData002.xlsx";
+        Excel2Network excel2Network = new Excel2Network(fileName);
+        NetWork netWork = excel2Network.getNetWork();
+        netWork.init();
+
+        AviationKerosene oil = new AviationKerosene();
+        FixedFunction fixedFunction = new FixedFunction(netWork,oil);
+
+        SteadyState steadyState = new SteadyState(fixedFunction);
+        steadyState.setTimes(200 * 3600.00);
+        steadyState.run();
+        double[][] coefficientMatrix = steadyState.getCoefficientMatrix();
+        double[] b = steadyState.getB();
+        double[][] bb = new double[b.length][1];
+        for (int i = 0; i < b.length; i++) {
+            bb[i][0] = b[i];
+        }
+        List<double[]> Q = steadyState.getQout();
+        double[][] Qout = new double[Q.size()][Q.get(0).length];
+        for (int i = 0; i < Qout.length; i++) {
+            for (int j = 0; j < Qout[i].length; j++) {
+                Qout[i][j] = Q.get(i)[j];
+            }
+        }
+        List<double[]> H = steadyState.getHout();
+        double[][] Hout = new double[H.size()][H.get(0).length];
+        for (int i = 0; i < Hout.length; i++) {
+            for (int j = 0; j < Hout[i].length; j++) {
+                Hout[i][j] = H.get(i)[j];
+            }
+        }
+
+        ExcelOutput excelOutput = new ExcelOutput();
+        excelOutput.setFileName("C:\\Users\\WangHH\\Desktop\\OutputData002.xlsx");
+        Map<String,double[][]> inputData = new HashMap<>();
+        inputData.put("系数矩阵",coefficientMatrix);
+        inputData.put("b",bb);
+        inputData.put("Qout",Qout);
+        inputData.put("Hout",Hout);
+        excelOutput.setInputData(inputData);
+        excelOutput.writeTwoData2Excel();
     }
 
     private static void test06() throws Exception {
-        String fileName = "C:\\Users\\WangHH\\Desktop\\InputData.xlsx";
+        String fileName = "C:\\Users\\WangHH\\Desktop\\InputData002.xlsx";
         Excel2Network excel2Network = new Excel2Network(fileName);
         NetWork netWork = excel2Network.getNetWork();
         netWork.init();
@@ -54,7 +101,7 @@ public class test {
         }
 
         ExcelOutput excelOutput = new ExcelOutput();
-        excelOutput.setFileName("C:\\Users\\WangHH\\Desktop\\OutputData.xlsx");
+        excelOutput.setFileName("C:\\Users\\WangHH\\Desktop\\OutputData002.xlsx");
         Map<String,double[][]> inputData = new HashMap<>();
         inputData.put("系数矩阵",matrix);
         inputData.put("b",bb);
@@ -317,5 +364,15 @@ public class test {
         for (int i = 0; i < allSegLength.length; i++) {
             System.out.print(allSegLength[i] + "__");
         }
+    }
+
+    private static void test07() {
+        int n = 1800;
+        MatrixD A = Matrices.randomUniformD(n, n);
+        MatrixD B = Matrices.randomUniformD(n, 1);
+        MatrixD x = Matrices.createD(n, 1);
+//        A.lud();
+        x = A.solve(B, x);
+        System.out.print(x + "_");
     }
 }

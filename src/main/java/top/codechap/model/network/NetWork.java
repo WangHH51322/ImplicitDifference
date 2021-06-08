@@ -30,6 +30,7 @@ public class NetWork {
     private Integer halfSize;
     private Integer QnSize;
     private Integer HnSize;
+    private Integer HnRealSize;
 
     public NetWork() {
         this.longPipes = new ArrayList<>();
@@ -106,8 +107,9 @@ public class NetWork {
         }
         halfSize = sum + longPipes.size() + 2 * (shortPipes.size() + regValves.size());
         QnSize = sum + longPipes.size() + 2 * (shortPipes.size() + regValves.size());
-        HnSize = sum + 2 * (longPipes.size() + shortPipes.size() + regValves.size());
-        sum = 2 * sum + longPipes.size() + 4 * (shortPipes.size() + regValves.size());
+        HnRealSize = sum + 2 * (longPipes.size() + shortPipes.size() + regValves.size());
+        HnSize = sum + 2 * (shortPipes.size() + regValves.size());
+        sum = QnSize + HnSize;
         matrixSize = sum;
     }
 

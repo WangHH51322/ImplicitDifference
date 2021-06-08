@@ -62,7 +62,7 @@ public class CalculateLambda implements Serializable {
                 break;
             }
         }
-        System.out.println("lambda循环了:" + i + "次");
+//        System.out.println("lambda循环了:" + i + "次");
 
         this.lambda = lambda;
         this.m = m;

@@ -40,7 +40,9 @@ public class ExcelOutput {
             workbook.createSheet("系数矩阵");
             workbook.createSheet("b");
             workbook.createSheet("Qn");
+            workbook.createSheet("Qout");
             workbook.createSheet("Hn");
+            workbook.createSheet("Hout");
             workbook.write(outputStream);
         } catch (Exception e) {
             e.printStackTrace();
