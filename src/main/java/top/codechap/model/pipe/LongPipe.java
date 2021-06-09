@@ -140,12 +140,12 @@ public class LongPipe extends Pipe{
 
 
     @Override
-    public Double getFirstQn(Double[] Qn) {
+    public Double getFirstQn(double[] Qn) {
         return Qn[getFirstQNumb()];
     }
 
     @Override
-    public Double getFirstHn(Double[] Hn) {
+    public Double getFirstHn(double[] Hn) {
         List<Integer> firstHRealNumb = getFirstHRealNumb();
         Double H2 = Hn[firstHRealNumb.get(0)];
         Double H3 = Hn[firstHRealNumb.get(1)];
@@ -155,12 +155,12 @@ public class LongPipe extends Pipe{
     }
 
     @Override
-    public Double getLastQn(Double[] Qn) {
+    public Double getLastQn(double[] Qn) {
         return Qn[getLastQNumb()];
     }
 
     @Override
-    public Double getLastHn(Double[] Hn) {
+    public Double getLastHn(double[] Hn) {
         List<Integer> lastHRealNumb = getLastHRealNumb();
         Double HLastBeforeTwo = Hn[lastHRealNumb.get(0)];
         Double HLastBeforeOne = Hn[lastHRealNumb.get(1)];

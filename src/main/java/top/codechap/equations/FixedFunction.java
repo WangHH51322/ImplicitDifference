@@ -187,7 +187,7 @@ public class FixedFunction {
             shortPipe.setBeta(calculateLambda.getBeta());
             /*短管压降计算*/
             Double deltaH = shortPipe.CalculateHl(Qn[firstQNumb],oil.getViscosity());
-            System.out.println("deltaH" + deltaH);
+//            System.out.println("deltaH" + deltaH);
             /*短管运动方程右端向量b*/
             b[motionNumb[0]] = deltaH;
 
@@ -265,7 +265,7 @@ public class FixedFunction {
                 break;
             case 200 :  //与两个元件相连,作为双入口;此时是元件入口
                 Element oneOf200 = outElements.get(0);  //获取 与这个节点相连,并且作为元件入口的另一个元件
-                if (oneOf200.getNumb() == startNode.getNumb()) {
+                if (oneOf200.getNumb() == element.getNumb()) {
                     oneOf200 = inElements.get(1);
                 }
                 if (!startNode.isUsed()) {    //判断入口是否曾使用过节点流量平衡条件,如果否,则可以使用节点流量平衡条件
@@ -346,6 +346,7 @@ public class FixedFunction {
 //        System.out.println("执行出口边界条件方法");
         Node endNode = element.getEndNode();    //元件出口节点边界条件
         Integer nodeType = endNode.getType();
+        List<Element> elements = endNode.getElements(); //获取与这个节点相连的其他元件
         List<Element> inElements = endNode.getInElements(); //获取与这个节点相连,并且作为元件出口的其他元件
         List<Element> outElements = endNode.getOutElements(); //获取与这个节点相连,并且作为元件入口的其他元件
         Integer connectionType = endNode.nodeConnectionType();  //查看节点的连接类型
@@ -364,7 +365,7 @@ public class FixedFunction {
                 } else {
                     throw new RuntimeException("节点" + endNode.getNumb() + "作为元件" + element.getNumb() + "出口存在问题");
                 }
-                System.out.println("节点" + endNode.getNumb() + "作为元件" + element.getNumb() + "出口");
+//                System.out.println("节点" + endNode.getNumb() + "作为元件" + element.getNumb() + "出口");
                 break;
             case 210 :  //与两个元件相连,作为一入一出;此时是元件出口
                 Element oneOf210 = outElements.get(0);    //获取 与这个节点相连,并且作为元件入口的另一个元件
@@ -382,7 +383,7 @@ public class FixedFunction {
                 break;
             case 211 :  //与两个元件相连,作为双出口;此时是元件出口
                 Element oneOf211 = inElements.get(0);  //获取 与这个节点相连,并且作为元件出口的另一个元件
-                if (oneOf211.getNumb() == endNode.getNumb()) {
+                if (oneOf211.getNumb() == element.getNumb()) {
                     oneOf211 = inElements.get(1);
                 }
                 if (!endNode.isUsed()) {    //判断出口是否曾使用过节点流量平衡条件,如果否,则可以继续使用节点流量平衡条件
@@ -426,10 +427,14 @@ public class FixedFunction {
                 } else {
                     throw new RuntimeException("节点" + endNode.getNumb() + "作为元件" + element.getNumb() + "出口存在问题");
                 }
+                break;
             case 3110 : //与三个元件相连,作为一入二出;此时是元件出口
+//                System.out.println("endNode.getNumb() = " + endNode.getNumb());
                 Element oneOf3110 = inElements.get(0);  //获取 与这个节点相连,并且作为元件出口的另一个元件
+//                System.out.println("inElements.size() = " + inElements.size());
                 Element twoOf3110 = outElements.get(0);  //获取 与这个节点相连,并且作为元件入口的另一个元件
-                if (oneOf3110.getNumb() == endNode.getNumb()) {
+//                System.out.println("outElements.size() = " + outElements.size());
+                if (oneOf3110.getNumb() == element.getNumb()) {
                     oneOf3110 = inElements.get(1);
                 }
                 if (!endNode.isUsed()) {    //判断出口是否曾使用过节点流量平衡条件,如果否,则可以继续使用节点流量平衡条件
@@ -463,7 +468,6 @@ public class FixedFunction {
                 }
                 break;
             case 3111 : //3111 与三个元件相连,作为三出口;此时是元件出口
-                List<Element> elements = endNode.getElements();
                 Element element0 = elements.get(0);
                 Element element1 = elements.get(1);
                 Element element2 = elements.get(2);
@@ -509,6 +513,7 @@ public class FixedFunction {
         double result;
         result = (oil.getK()/oil.getRou()) / (1 + pipe.getC() * (oil.getK()*pipe.insideDiameter()) / (pipe.getE())*pipe.getThickness());
         result = Math.pow(result,0.5);
+        System.out.println("压力波波速a: " + result);
         return result;
     }
 }

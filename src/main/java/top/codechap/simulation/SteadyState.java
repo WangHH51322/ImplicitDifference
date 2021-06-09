@@ -3,12 +3,14 @@ package top.codechap.simulation;
 import lombok.Data;
 import net.jamu.matrix.Matrices;
 import net.jamu.matrix.MatrixD;
+import top.codechap.Element;
 import top.codechap.constant.Constant;
 import top.codechap.equations.FixedFunction;
 import top.codechap.model.network.NetWork;
 import top.codechap.model.node.Node;
 import top.codechap.model.pipe.LongPipe;
 import top.codechap.model.pipe.ShortPipe;
+import top.codechap.model.valve.RegulatingValve;
 import top.codechap.utils.Excel2Network;
 
 import java.util.ArrayList;
@@ -30,6 +32,7 @@ public class SteadyState {
     private List<double[]> Qout;
     private double[] Hn;
     private List<double[]> Hout;
+    private NetWork netWork;
 
     public SteadyState(FixedFunction fixedFunction) {
         this.fixedFunction = fixedFunction;
@@ -37,16 +40,17 @@ public class SteadyState {
     }
 
     private void init() {
+        netWork = fixedFunction.getNetWork();
         fixedFunction.GenerateCoefficientMatrix();  //生成系数矩阵
         try {
             CoefficientMatrix = fixedFunction.CompleteCoefficientMatrix();  //根据默认的Qn,Hn初值,补齐系数矩阵和边界条件;生成b
         } catch (Exception e) {
             e.printStackTrace();
         }
-        x = new double[fixedFunction.getNetWork().getMatrixSize()];    //给x赋初值
+        x = new double[netWork.getMatrixSize()];    //给x赋初值
 
-        Qn = new double[fixedFunction.getNetWork().getQnSize()];
-        Hn = new double[fixedFunction.getNetWork().getHnSize()];
+        Qn = new double[netWork.getQnSize()];
+        Hn = new double[netWork.getHnSize()];
         Qout = new ArrayList<>();
         Hout = new ArrayList<>();
 
@@ -75,26 +79,15 @@ public class SteadyState {
             System.out.println("第"+ (calculateTimes + 1) + "次直接求解计算时间: " + (endTime - startTime) / 1000000 + "毫秒");
 
             /*将计算结果赋值给下一次迭代*/
-//            System.out.println("matX:");
             for (int i = 0; i < x.length; i++) {
                 x[i] = matX.get(i,0);
-//                System.out.print(matX.get(i,0) + " ");
             }
-//            System.out.println();
-
-//            System.out.println("Qn:");
             for (int i = 0; i < Qn.length; i++) {
                 Qn[i] = matX.get(i,0);
-//                System.out.print(Qn[i] + " ");
             }
-//            System.out.println();
-
-//            System.out.println("Hn:");
             for (int i = 0; i < Hn.length; i++) {
                 Hn[i] = matX.get(i+Qn.length,0);
-//                System.out.print(Hn[i] + " ");
             }
-//            System.out.println();
 
             double[] qOut = new double[Qn.length];
             System.arraycopy(Qn, 0, qOut, 0, Qn.length);
@@ -113,13 +106,6 @@ public class SteadyState {
             calculateTimes ++;
 
             /*判断是否需要跳出循环*/
-//            double[] QnBefore = Qout.get(Qout.size() - 2);
-//            System.out.println();
-//            System.out.println("Qout.length = " + Qout.size());
-//            System.out.println("QnBefore:");
-//            for (int i = 0; i < QnBefore.length; i++) {
-//                System.out.print(QnBefore[i] + " ");
-//            }
             boolean needToEnd = true;
             double[] QnBefore = Qout.get(Qout.size() - 2);
             for (int i = 0; i < Qn.length; i++) {
@@ -139,9 +125,55 @@ public class SteadyState {
                 break;
             }
         }
+
+        /*将最后一个次时步计算的结果整理,对应到元件和节点中,*/
+        List<LongPipe> longPipes = netWork.getLongPipes();
+        List<ShortPipe> shortPipes = netWork.getShortPipes();
+        List<RegulatingValve> regValves = netWork.getRegValves();
+        List<Node> nodes = netWork.getNodes();
+        if (longPipes.size() != 0) {
+            for (LongPipe longPipe : longPipes) {
+                SeparateQnHnIntoNodes(longPipe, nodes);
+            }
+        }
+        if (shortPipes.size() != 0) {
+            for (ShortPipe shortPipe : shortPipes) {
+                SeparateQnHnIntoNodes(shortPipe, nodes);
+            }
+        }
+        if (regValves.size() != 0) {
+            for (RegulatingValve regValve : regValves) {
+                SeparateQnHnIntoNodes(regValve, nodes);
+            }
+        }
+
+        /*结果不收敛*/
         if (calculateTimes == times) {
             System.out.println("=+++++++++++++++++++=");
             System.out.println("已经迭代" + calculateTimes + "次,迭代次数已达上限,结果仍未收敛");
+        }
+    }
+
+    /*将最后一个次时步计算的结果整理,对应到元件和节点中,*/
+    private void SeparateQnHnIntoNodes(Element element, List<Node> nodes) {
+        Integer startNumb = element.getStartNumb();
+        Node startNode = nodes.get(startNumb - 1);
+        Integer startNodeType = startNode.getType();
+        if (startNodeType == 0) { //入口节点
+            startNode.setFlow(element.getFirstQn(Qn));
+        }
+        if (startNodeType == 1 || startNodeType == 2) {   //出口节点
+            startNode.setPressure(element.getFirstHn(Hn) * fixedFunction.getOil().getRou() * Constant.G);
+        }
+
+        Integer endNumb = element.getEndNumb();
+        Node endNode = nodes.get(endNumb - 1);
+        Integer endNodeType = endNode.getType();
+        if (endNodeType == 0) { //入口节点
+            endNode.setFlow(element.getLastQn(Qn));
+        }
+        if (endNodeType == 1 || endNodeType == 2) {   //出口节点,中间节点
+            endNode.setPressure(element.getLastHn(Hn)  * fixedFunction.getOil().getRou() * Constant.G);
         }
     }
 

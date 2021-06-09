@@ -16,8 +16,8 @@ public abstract class Element {
     private Integer startNumb;  //元件起点编号
     private Integer endNumb;  //元件终编号
 
-    private Node startNode;
-    private Node endNode;
+    private Node startNode; //元件起点节点
+    private Node endNode;   //元件终点节点
 
     private Integer[] QNumb;    //系数矩阵中,元件Q所在的列编号,等同于Qn中的index
     private Integer[] HNumb;    //系数矩阵中,元件H所在的列编号
@@ -39,10 +39,10 @@ public abstract class Element {
     public abstract List<Double> getStartCoefficient();     //长管段首端差分系数
     public abstract List<Double> getEndCoefficient();     //长管段末端差分系数
 
-    public abstract Double getFirstQn(Double[] Qn);
-    public abstract Double getFirstHn(Double[] Hn);
-    public abstract Double getLastQn(Double[] Qn);
-    public abstract Double getLastHn(Double[] Hn);
+    public abstract Double getFirstQn(double[] Qn);
+    public abstract Double getFirstHn(double[] Hn);
+    public abstract Double getLastQn(double[] Qn);
+    public abstract Double getLastHn(double[] Hn);
 
     public abstract Integer getLastMomentumNumb();     //获取MomentumNumb中的最后一个值
     public abstract Integer getLastMotionNumb();     //获取MomentumNumb中的最后一个值

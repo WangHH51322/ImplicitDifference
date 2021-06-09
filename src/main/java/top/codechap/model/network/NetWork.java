@@ -55,47 +55,17 @@ public class NetWork {
     private void ConnectElementAndNode() {   //根据元件的起终点编号将其与对应的节点关联起来;
         if (longPipes.size() != 0) {
             for (LongPipe longPipe : longPipes) {
-                Integer startNumb = longPipe.getStartNumb();
-                Node startNode = nodes.get(startNumb - 1);
-                startNode.addElements(longPipe);
-                startNode.addOutElements(longPipe);
-                longPipe.setStartNode(startNode);
-
-                Integer endNumb = longPipe.getEndNumb();
-                Node endNode = nodes.get(endNumb - 1);
-                endNode.addElements(longPipe);
-                endNode.addInElements(longPipe);
-                longPipe.setEndNode(endNode);
+                ConnectEAndN(longPipe);
             }
         }
         if (shortPipes.size() != 0) {
             for (ShortPipe shortPipe : shortPipes) {
-                Integer startNumb = shortPipe.getStartNumb();
-                Node startNode = nodes.get(startNumb - 1);
-                startNode.addElements(shortPipe);
-                startNode.addOutElements(shortPipe);
-                shortPipe.setStartNode(startNode);
-
-                Integer endNumb = shortPipe.getEndNumb();
-                Node endNode = nodes.get(endNumb - 1);
-                endNode.addElements(shortPipe);
-                endNode.addInElements(shortPipe);
-                shortPipe.setEndNode(endNode);
+                ConnectEAndN(shortPipe);
             }
         }
         if (regValves.size() != 0) {
             for (RegulatingValve regValve : regValves) {
-                Integer startNumb = regValve.getStartNumb();
-                Node startNode = nodes.get(startNumb - 1);
-                startNode.addElements(regValve);
-                startNode.addOutElements(regValve);
-                regValve.setStartNode(startNode);
-
-                Integer endNumb = regValve.getEndNumb();
-                Node endNode = nodes.get(endNumb - 1);
-                endNode.addElements(regValve);
-                endNode.addInElements(regValve);
-                regValve.setEndNode(endNode);
+                ConnectEAndN(regValve);
             }
         }
     }
@@ -128,6 +98,20 @@ public class NetWork {
             UpdateRegValveQHNumb(); //给阀门中的QNumb和HNumb属性值赋值
             UpdateRegValveMMNumb(); //给阀门中的MomentumNumb,MotionNumb,outBoundaryConditionNumb,inBoundaryConditionNumb属性赋值
         }
+    }
+
+    private void ConnectEAndN(Element element) {
+        Integer startNumb = element.getStartNumb();
+        Node startNode = nodes.get(startNumb - 1);
+        startNode.addElements(element);
+        startNode.addOutElements(element);
+        element.setStartNode(startNode);
+
+        Integer endNumb = element.getEndNumb();
+        Node endNode = nodes.get(endNumb - 1);
+        endNode.addElements(element);
+        endNode.addInElements(element);
+        element.setEndNode(endNode);
     }
 
     private void UpdateRegValveMMNumb() {   //给阀门中的MomentumNumb,MotionNumb,outBoundaryConditionNumb,inBoundaryConditionNumb属性赋值

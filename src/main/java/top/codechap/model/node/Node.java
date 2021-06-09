@@ -18,10 +18,10 @@ import java.util.List;
 @AllArgsConstructor
 public class Node {
 
-    private Integer numb;
-    private Double flow;
-    private Double pressure;
-    private Boolean flag;
+    private Integer numb;   //节点编号
+    private Double flow;    //节点流量
+    private Double pressure;    //节点压力
+    private Boolean flag;   //节点是否使用过流量平衡方程
 
     private Integer type;   //0 入口 ,   1 出口,   2 中间节点
     private Integer connectionType; //10 与一个元件相连,作为元件入口;     11 与一个元件相连,作为元件出口;

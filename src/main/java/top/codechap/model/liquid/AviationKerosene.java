@@ -18,7 +18,7 @@ public class AviationKerosene {
     private Double viscosity;
 
     public AviationKerosene() {
-        this.rou = 875.00;
+        this.rou = 794.121;
         this.K = 1360000000.00;
         this.viscosity = 1.019 * Math.pow(10,-6);
     }

@@ -87,22 +87,22 @@ public class RegulatingValve extends Valve{
     }
 
     @Override
-    public Double getFirstQn(Double[] Qn) {
+    public Double getFirstQn(double[] Qn) {
         return Qn[getFirstQNumb()];
     }
 
     @Override
-    public Double getFirstHn(Double[] Hn) {
+    public Double getFirstHn(double[] Hn) {
         return Hn[getFirstHRealNumb().get(0)];
     }
 
     @Override
-    public Double getLastQn(Double[] Qn) {
+    public Double getLastQn(double[] Qn) {
         return Qn[getLastQNumb()];
     }
 
     @Override
-    public Double getLastHn(Double[] Hn) {
+    public Double getLastHn(double[] Hn) {
         return Hn[getLastHRealNumb().get(0)];
     }
 

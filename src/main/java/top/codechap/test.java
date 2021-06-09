@@ -29,11 +29,12 @@ import java.util.Map;
  */
 public class test {
     public static void main(String[] args) throws Exception {
+//        test09();
         test08();
-     }
+    }
 
     private static void test08() throws Exception {
-        String fileName = "C:\\Users\\WangHH\\Desktop\\InputData002.xlsx";
+        String fileName = "C:\\Users\\WangHH\\Desktop\\InputDataGuangZhou.xlsx";
         Excel2Network excel2Network = new Excel2Network(fileName);
         NetWork netWork = excel2Network.getNetWork();
         netWork.init();
@@ -42,7 +43,7 @@ public class test {
         FixedFunction fixedFunction = new FixedFunction(netWork,oil);
 
         SteadyState steadyState = new SteadyState(fixedFunction);
-        steadyState.setTimes(200 * 3600.00);
+        steadyState.setTimes(20.00 * 600);
         steadyState.run();
         double[][] coefficientMatrix = steadyState.getCoefficientMatrix();
         double[] b = steadyState.getB();
@@ -64,16 +65,44 @@ public class test {
                 Hout[i][j] = H.get(i)[j];
             }
         }
+        List<Node> nodes = netWork.getNodes();
+        double[][] nodeData = new double[nodes.size()][3];
+        for (int i = 0; i < nodes.size(); i++) {
+            Node node = nodes.get(i);
+            nodeData[i][0] = node.getNumb();
+            nodeData[i][1] = node.getFlow();
+            nodeData[i][2] = node.getPressure();
+        }
 
+        long startTimeOfCreateExcel = System.currentTimeMillis();
         ExcelOutput excelOutput = new ExcelOutput();
-        excelOutput.setFileName("C:\\Users\\WangHH\\Desktop\\OutputData002.xlsx");
+        excelOutput.setFileName("C:\\Users\\WangHH\\Desktop\\OutputDataGuangZhou.xlsx");
         Map<String,double[][]> inputData = new HashMap<>();
         inputData.put("系数矩阵",coefficientMatrix);
         inputData.put("b",bb);
         inputData.put("Qout",Qout);
         inputData.put("Hout",Hout);
+        inputData.put("nodeData",nodeData);
         excelOutput.setInputData(inputData);
         excelOutput.writeTwoData2Excel();
+        long endTimeOfCreateExcel = System.currentTimeMillis();
+        System.out.println("结果已经保存Excel");
+        System.out.println("耗时: " + (endTimeOfCreateExcel - startTimeOfCreateExcel) + "ms");
+    }
+
+    private static void test09() {
+        String fileName = "C:\\Users\\WangHH\\Desktop\\InputData002.xlsx";
+        Excel2Network excel2Network = new Excel2Network(fileName);
+        NetWork netWork = excel2Network.getNetWork();
+        netWork.init();
+        for (Node node : netWork.getNodes()) {
+            System.out.println("node.getNumb() = " + node.getNumb());
+            System.out.println("node.nodeConnectionType() = " + node.nodeConnectionType());
+            System.out.println("node.getElements().size() = " + node.getElements().size());
+            System.out.println("node.getInElements().size() = " + node.getInElements().size());
+            System.out.println("node.getOutElements().size() = " + node.getOutElements().size());
+            System.out.println("=++++++++++++++++++++++++=");
+        }
     }
 
     private static void test06() throws Exception {
