@@ -153,13 +153,16 @@ public class FixedFunction {
             Integer[] hRealNumb = longPipe.getHRealNumb();  //长管段中HRealNumb所在的列编号
             /*长管段模组计算*/
             calculateLambda.calculate(Qn[firstQNumb],diameter,oil.getViscosity(),roughness);
-            longPipe.setLambda(calculateLambda.getLambda());
+            double longPipeLambda = calculateLambda.getLambda();
+            System.out.println("longPipeLambda = " + longPipeLambda);
+            longPipe.setLambda(longPipeLambda);
             longPipe.setM(calculateLambda.getM());
             longPipe.setBeta(calculateLambda.getBeta());
             /*给运动方程中的Q的系数赋值*/
             for (int j = 0; j < motionNumb.length; j++) {
                 Double tempValveA = longPipe.getLambda() * Constant.G * longPipe.area() * Constant.STEADY_STATE_T;
                 Double tempValveB = Math.pow(Math.abs(Qn[qNumb[j+1]]),(1 - longPipe.getM()));
+//                Double tempValveB = Math.pow(Qn[qNumb[j+1]],(1 - longPipe.getM()));
                 CoefficientMatrix[motionNumb[j]][qNumb[j+1]] = (1 + tempValveA * tempValveB);
                 /*给方程右端b赋值*/
                 b[motionNumb[j]] = Qn[qNumb[j+1]];
@@ -182,7 +185,9 @@ public class FixedFunction {
             Integer[] motionNumb = shortPipe.getMotionNumb();    //短管段中运动方程行编号
             /*短管段模组计算*/
             calculateLambda.calculate(Qn[firstQNumb],diameter,oil.getViscosity(),roughness);
-            shortPipe.setLambda(calculateLambda.getLambda());
+            double shortPipeLambda = calculateLambda.getLambda();
+            System.out.println("shortPipeLambda = " + shortPipeLambda);
+            shortPipe.setLambda(shortPipeLambda);
             shortPipe.setM(calculateLambda.getM());
             shortPipe.setBeta(calculateLambda.getBeta());
             /*短管压降计算*/
@@ -222,6 +227,7 @@ public class FixedFunction {
     private void EntranceBoundaryCondition(Element element) throws Exception {
 //        System.out.println("执行入口边界条件方法");
         Node startNode = element.getStartNode();    //元件入口节点
+        Node endNode = element.getEndNode();    //元件出口节点
         Integer nodeType = startNode.getType(); //元件入口节点的类型
         List<Element> inElements = startNode.getInElements(); //获取与这个节点相连,并且作为元件出口的其他元件
         List<Element> outElements = startNode.getOutElements(); //获取与这个节点相连,并且作为元件入口的其他元件
@@ -233,12 +239,14 @@ public class FixedFunction {
         List<Double> startCoefficientOfElement = element.getStartCoefficient(); //获取元件第一个或两个HNumb对应的系数
         switch(connectionType) {
             case 10 :   //与一个元件相连,作为元件入口;
-                for (int i = 0; i < firstHNumbsOfElement.size(); i++) {
-                    CoefficientMatrix[inNumb][firstHNumbsOfElement.get(i)] = startCoefficientOfElement.get(i);  //入口压力平衡
-                }
-                if (nodeType == 2) {    //startNode是盲段
+                if (nodeType == 2) {    //startNode是盲段,其压力等于与之相连的管段的终点的压力
+                    CoefficientMatrix[inNumb][firstQNumb] = 1;  //盲端流量恒为0
+//                    List<Integer> firstHRealNumb = element.getFirstHRealNumb();
                     b[inNumb] = 0;
                 } else if (nodeType == 0) { //startNode是管网入口
+                    for (int i = 0; i < firstHNumbsOfElement.size(); i++) {
+                        CoefficientMatrix[inNumb][firstHNumbsOfElement.get(i)] = startCoefficientOfElement.get(i);  //入口压力平衡
+                    }
                     b[inNumb] = startNode.getPressure() / (oil.getRou() * Constant.G);
                 } else {
                     throw new RuntimeException("节点" + startNode.getNumb() + "作为元件" + element.getNumb() + "入口存在问题");
@@ -255,10 +263,10 @@ public class FixedFunction {
                 for (int i = 0; i < lastHNumbsOf210.size(); i++) {
                     CoefficientMatrix[inNumb][lastHNumbsOf210.get(i)] = - endCoefficientOf210.get(i);  //入口压力平衡
                 }
-                if (nodeType == 2) {    //endNode是中间节点
+                if (nodeType == 2) {    //startNode是中间节点
                     b[inNumb] = 0.00;
-                } else if (nodeType == 1) { //endNode是管网出口
-                    b[inNumb] = 0.00;
+                } else if (nodeType == 1) { //startNode是管网出口
+                    b[inNumb] = startNode.getFlow();
                 } else {
                     throw new RuntimeException("节点" + startNode.getNumb() + "作为元件" + element.getNumb() + "入口存在问题");
                 }
@@ -266,7 +274,7 @@ public class FixedFunction {
             case 200 :  //与两个元件相连,作为双入口;此时是元件入口
                 Element oneOf200 = outElements.get(0);  //获取 与这个节点相连,并且作为元件入口的另一个元件
                 if (oneOf200.getNumb() == element.getNumb()) {
-                    oneOf200 = inElements.get(1);
+                    oneOf200 = outElements.get(1);
                 }
                 if (!startNode.isUsed()) {    //判断入口是否曾使用过节点流量平衡条件,如果否,则可以使用节点流量平衡条件
                     Integer oneInNumbOf211 = oneOf200.getInBoundaryConditionNumb();    //one元件入口边界条件所在行编号
@@ -332,7 +340,7 @@ public class FixedFunction {
                         CoefficientMatrix[inNumb][firstHNumbsOfElement.get(i)] = startCoefficientOfElement.get(i);  //element入口压力平衡
                     }
                     for (int i = 0; i < firstHNumbOfElement0.size(); i++) {
-                        CoefficientMatrix[inNumb][firstHNumbOfElement0.get(i)] = startCoefficientOfElement0.get(i);  //element入口压力平衡
+                        CoefficientMatrix[inNumb][firstHNumbOfElement0.get(i)] = - startCoefficientOfElement0.get(i);  //element入口压力平衡
                     }
                 } else {
                     throw new RuntimeException("节点" + startNode.getNumb() + "作为元件" + element.getNumb() + "入口存在问题,是三入口");
@@ -358,8 +366,8 @@ public class FixedFunction {
         switch(connectionType) {
             case 11 :   //与一个元件相连,作为元件出口;
                 CoefficientMatrix[outNumb][lastQNumb] = 1;  //出口流量平衡
-                if (nodeType == 2) {    //endNode是盲段
-                    b[outNumb] = 0;
+                if (nodeType == 2) {    //endNode是盲段,此处流量恒为0
+                    b[outNumb] = 0.0;
                 } else if (nodeType == 1) { //endNode是管网出口
                     b[outNumb] = endNode.getFlow();
                 } else {
@@ -485,7 +493,7 @@ public class FixedFunction {
                         CoefficientMatrix[outNumb][lastHNumbsOfElement.get(i)] = endCoefficientOfElement.get(i);  //element出口压力平衡
                     }
                     for (int i = 0; i < lastHNumbOfElement0.size(); i++) {
-                        CoefficientMatrix[outNumb][lastHNumbOfElement0.get(i)] = endCoefficientOfElement0.get(i);  //element0出口压力平衡
+                        CoefficientMatrix[outNumb][lastHNumbOfElement0.get(i)] = - endCoefficientOfElement0.get(i);  //element0出口压力平衡
                     }
                 } else {
                     throw new RuntimeException("节点" + endNode.getNumb() + "作为元件" + element.getNumb() + "入口存在问题,是三入口");

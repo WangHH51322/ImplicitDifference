@@ -29,12 +29,14 @@ import java.util.Map;
  */
 public class test {
     public static void main(String[] args) throws Exception {
-//        test09();
-        test08();
+        test04();
+//        test08();
     }
 
     private static void test08() throws Exception {
-        String fileName = "C:\\Users\\WangHH\\Desktop\\InputDataGuangZhou.xlsx";
+//        String fileName = "C:\\Users\\WangHH\\Desktop\\InputDataGuangZhou.xlsx";
+        String fileName = "C:\\Users\\WangHH\\Desktop\\InputDataQingDao02.xlsx";
+//        String fileName = "C:\\Users\\WangHH\\Desktop\\InputData06.xlsx";
         Excel2Network excel2Network = new Excel2Network(fileName);
         NetWork netWork = excel2Network.getNetWork();
         netWork.init();
@@ -43,7 +45,7 @@ public class test {
         FixedFunction fixedFunction = new FixedFunction(netWork,oil);
 
         SteadyState steadyState = new SteadyState(fixedFunction);
-        steadyState.setTimes(20.00 * 600);
+        steadyState.setTimes(1800.00 * 1.00);
         steadyState.run();
         double[][] coefficientMatrix = steadyState.getCoefficientMatrix();
         double[] b = steadyState.getB();
@@ -65,22 +67,33 @@ public class test {
                 Hout[i][j] = H.get(i)[j];
             }
         }
+        List<double[]> nodeHout = steadyState.getNodeHout();
+        double[][] Hn = new double[nodeHout.size()][nodeHout.get(0).length];
+        for (int i = 0; i < Hn.length; i++) {
+            for (int j = 0; j < Hn[i].length; j++) {
+                Hn[i][j] = nodeHout.get(i)[j];
+            }
+        }
         List<Node> nodes = netWork.getNodes();
-        double[][] nodeData = new double[nodes.size()][3];
+        double[][] nodeData = new double[nodes.size()][4];
         for (int i = 0; i < nodes.size(); i++) {
             Node node = nodes.get(i);
             nodeData[i][0] = node.getNumb();
             nodeData[i][1] = node.getFlow();
             nodeData[i][2] = node.getPressure();
+            nodeData[i][3] = node.nodeConnectionType();
         }
 
         long startTimeOfCreateExcel = System.currentTimeMillis();
         ExcelOutput excelOutput = new ExcelOutput();
-        excelOutput.setFileName("C:\\Users\\WangHH\\Desktop\\OutputDataGuangZhou.xlsx");
+//        excelOutput.setFileName("C:\\Users\\WangHH\\Desktop\\OutputDataGuangZhou.xlsx");
+        excelOutput.setFileName("C:\\Users\\WangHH\\Desktop\\OutputDataQingDao02.xlsx");
+//        excelOutput.setFileName("C:\\Users\\WangHH\\Desktop\\OutputData06.xlsx");
         Map<String,double[][]> inputData = new HashMap<>();
-        inputData.put("系数矩阵",coefficientMatrix);
+//        inputData.put("系数矩阵",coefficientMatrix);
         inputData.put("b",bb);
         inputData.put("Qout",Qout);
+        inputData.put("Hn",Hn);
         inputData.put("Hout",Hout);
         inputData.put("nodeData",nodeData);
         excelOutput.setInputData(inputData);
@@ -154,28 +167,32 @@ public class test {
     }
 
     private static void test04() {
-        String fileName = "C:\\Users\\WangHH\\Desktop\\InputData002.xlsx";
+        String fileName = "C:\\Users\\WangHH\\Desktop\\InputData04.xlsx";
         Excel2Network excel2Network = new Excel2Network(fileName);
         List<Node> nodes = excel2Network.getNodes();
         System.out.println("nodes: ");
         for (Node node : nodes) {
             System.out.println(node);
         }
+        System.out.println("nodes.size() = " + nodes.size());
         System.out.println("longPipes: ");
         List<LongPipe> longPipes = excel2Network.getLongPipes();
         for (LongPipe longPipe : longPipes) {
             System.out.println(longPipe);
         }
+        System.out.println("longPipes.size() = " + longPipes.size());
         System.out.println("shortPipes: ");
         List<ShortPipe> shortPipes = excel2Network.getShortPipes();
         for (ShortPipe shortPipe : shortPipes) {
             System.out.println(shortPipe);
         }
+        System.out.println("shortPipes.size() = " + shortPipes.size());
         System.out.println("valves: ");
         List<RegulatingValve> regValves = excel2Network.getRegValves();
         for (RegulatingValve valve : regValves) {
             System.out.println(valve);
         }
+        System.out.println("regValves.size() = " + regValves.size());
     }
 
     private static void test03() {

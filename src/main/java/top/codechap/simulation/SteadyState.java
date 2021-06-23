@@ -23,16 +23,18 @@ import java.util.List;
  */
 public class SteadyState {
 
-    private Integer times;
-    private FixedFunction fixedFunction;
-    private double[] b;
-    private double[] x;
-    private double[][] CoefficientMatrix;
-    private double[] Qn;
-    private List<double[]> Qout;
-    private double[] Hn;
-    private List<double[]> Hout;
-    private NetWork netWork;
+    private Integer times;  //迭代次数=总时长/时步
+    private FixedFunction fixedFunction;    //系数矩阵
+    private double[] b; //右端向量
+    private double[] x; //未知向量
+    private double[][] CoefficientMatrix;   //系数矩阵默认系数
+    private double[] Qn;    //全线流量
+    private List<double[]> Qout;    //全线输出流量
+    private List<double[]> ElementQout; //全部原件内流量,以出口流量为准
+    private double[] Hn;    //全线压力
+    private List<double[]> Hout;    //全线输出压力
+    private List<double[]> NodeHout;    //连接点随时间变化的压力
+    private NetWork netWork;    //管网结构
 
     public SteadyState(FixedFunction fixedFunction) {
         this.fixedFunction = fixedFunction;
@@ -48,11 +50,11 @@ public class SteadyState {
             e.printStackTrace();
         }
         x = new double[netWork.getMatrixSize()];    //给x赋初值
-
         Qn = new double[netWork.getQnSize()];
         Hn = new double[netWork.getHnSize()];
         Qout = new ArrayList<>();
         Hout = new ArrayList<>();
+        NodeHout = new ArrayList<>();
 
         for (int i = 0; i < Qn.length; i++) {
             x[i] = fixedFunction.getInitQ0();
@@ -147,6 +149,37 @@ public class SteadyState {
             }
         }
 
+        /*根据Hout,抽取出NodeHout*/
+        for (int i = 0; i < Hout.size(); i++) {
+            double[] hOut = Hout.get(i);
+            double[] NodeH = new double[nodes.size()];
+            for (int j = 0; j < nodes.size(); j++) {
+                Node node = nodes.get(j);
+                Integer connectionType = node.nodeConnectionType();
+                double inH = 0.0;
+                Element element = null;
+                switch (connectionType) {
+                    case 10 :   //与一个元件相连,作为元件入口;
+                    case 200 :  //200 与两个元件相连,作为两个元件的入口;
+                    case 210 :  //与两个元件相连,作为一入一出;
+                    case 3000 : //3000 与三个元件相连,作为三个元件的入口;
+                    case 3100 : //3100 与三个元件相连,作为二入一出;
+                    case 3110 : //3110 与三个元件相连,作为一入二出;
+                        element = node.getOutElements().get(0);
+                        inH = element.getFirstHn(hOut) * fixedFunction.getOil().getRou() * Constant.G;
+                        break;
+                    case 11 :   //与一个元件相连,作为元件出口;
+                    case 211 :  //与两个元件相连,作为两个元件的出口;
+                    case 3111 :  //与三个元件相连,作为三个元件的出口;
+                        element = node.getInElements().get(0);
+                        inH = element.getLastHn(Hn)  * fixedFunction.getOil().getRou() * Constant.G;
+                        break;
+                }
+                NodeH[j] = inH;
+            }
+            NodeHout.add(NodeH);
+        }
+
         /*结果不收敛*/
         if (calculateTimes == times) {
             System.out.println("=+++++++++++++++++++=");
@@ -157,7 +190,14 @@ public class SteadyState {
     /*将最后一个次时步计算的结果整理,对应到元件和节点中,*/
     private void SeparateQnHnIntoNodes(Element element, List<Node> nodes) {
         Integer startNumb = element.getStartNumb();
-        Node startNode = nodes.get(startNumb - 1);
+        Node startNode = null;
+        for (Node node : nodes) {
+            int numb = node.getNumb();
+            if (numb == startNumb) {
+                startNode = node;
+                break;
+            }
+        }
         Integer startNodeType = startNode.getType();
         if (startNodeType == 0) { //入口节点
             startNode.setFlow(element.getFirstQn(Qn));
@@ -167,7 +207,14 @@ public class SteadyState {
         }
 
         Integer endNumb = element.getEndNumb();
-        Node endNode = nodes.get(endNumb - 1);
+        Node endNode = null;
+        for (Node node : nodes) {
+            int numb = node.getNumb();
+            if (numb == endNumb) {
+                endNode = node;
+                break;
+            }
+        }
         Integer endNodeType = endNode.getType();
         if (endNodeType == 0) { //入口节点
             endNode.setFlow(element.getLastQn(Qn));
@@ -175,6 +222,22 @@ public class SteadyState {
         if (endNodeType == 1 || endNodeType == 2) {   //出口节点,中间节点
             endNode.setPressure(element.getLastHn(Hn)  * fixedFunction.getOil().getRou() * Constant.G);
         }
+    }
+
+    public List<double[]> getElementQout() {
+        return ElementQout;
+    }
+
+    public void setElementQout(List<double[]> elementQout) {
+        ElementQout = elementQout;
+    }
+
+    public List<double[]> getNodeHout() {
+        return NodeHout;
+    }
+
+    public void setNodeHout(List<double[]> nodeHout) {
+        NodeHout = nodeHout;
     }
 
     public double[] getB() {

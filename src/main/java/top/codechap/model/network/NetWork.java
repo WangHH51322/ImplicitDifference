@@ -2,11 +2,9 @@ package top.codechap.model.network;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import top.codechap.Element;
 import top.codechap.model.node.Node;
 import top.codechap.model.pipe.LongPipe;
-import top.codechap.model.pipe.Pipe;
 import top.codechap.model.pipe.ShortPipe;
 import top.codechap.model.valve.RegulatingValve;
 
@@ -101,14 +99,34 @@ public class NetWork {
     }
 
     private void ConnectEAndN(Element element) {
-        Integer startNumb = element.getStartNumb();
-        Node startNode = nodes.get(startNumb - 1);
+        int startNumb = element.getStartNumb();
+        Node startNode = null;
+        for (Node node : nodes) {
+            int numb = node.getNumb();
+            if (numb == startNumb) {
+                startNode = node;
+                break;
+            }
+        }
+//        int startIndexOf = nodes.indexOf(startNode);
+//        Node startNode = nodes.get(startNumb - 1);
+//        Node startNode = nodes.get(startIndexOf);
         startNode.addElements(element);
         startNode.addOutElements(element);
         element.setStartNode(startNode);
 
-        Integer endNumb = element.getEndNumb();
-        Node endNode = nodes.get(endNumb - 1);
+        int endNumb = element.getEndNumb();
+        Node endNode = null;
+        for (Node node : nodes) {
+            int numb = node.getNumb();
+            if (numb == endNumb) {
+                endNode = node;
+                break;
+            }
+        }
+//        int EndIndexOf = nodes.indexOf(endNumb);
+//        Node endNode = nodes.get(endNumb - 1);
+//        Node endNode = nodes.get(EndIndexOf);
         endNode.addElements(element);
         endNode.addInElements(element);
         element.setEndNode(endNode);

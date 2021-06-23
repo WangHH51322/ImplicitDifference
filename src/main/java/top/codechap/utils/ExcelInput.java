@@ -53,6 +53,7 @@ public class ExcelInput {
 //        System.out.println("sheetCount = " + sheetCount);
         Map<String, List> data = new HashMap<>();
         for (int i = 0; i < sheetCount; i++) {
+//            System.out.println("sheetCount = " + i);
             //列数
             int columnCount = workbook.getSheetAt(i).getRow(0).getPhysicalNumberOfCells();
 //            System.out.println("columnCount = " + columnCount);
@@ -70,12 +71,12 @@ public class ExcelInput {
                 for (int k = 0; k < columnCount; k++) {
                     //获取单元格的值
                     var3 = String.valueOf(workbook.getSheetAt(i).getRow(j).getCell(k));
-                    var2.add(k, new String(var3));
+                    var2.add(k, var3);
                 }
                 var1.add(new ArrayList<>(var2));
                 var2.clear();
             }
-            data.put(new String(string), new ArrayList<>(var1));
+            data.put(string, new ArrayList<>(var1));
             var1.clear();
         }
         return data;

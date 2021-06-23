@@ -18,6 +18,9 @@ public abstract class Element {
 
     private Node startNode; //元件起点节点
     private Node endNode;   //元件终点节点
+//    private Double startH;  //元件入口处压力
+//    private Double endH;    //元件出口处压力
+//    private Double Q;       //元件内的流量    //这里以元件出口的流量作为基准
 
     private Integer[] QNumb;    //系数矩阵中,元件Q所在的列编号,等同于Qn中的index
     private Integer[] HNumb;    //系数矩阵中,元件H所在的列编号
